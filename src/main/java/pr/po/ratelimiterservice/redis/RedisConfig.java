@@ -1,4 +1,4 @@
-package pr.po.ratelimiterservice.config;
+package pr.po.ratelimiterservice.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
