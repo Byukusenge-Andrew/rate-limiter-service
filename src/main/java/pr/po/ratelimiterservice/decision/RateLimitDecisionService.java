@@ -8,8 +8,6 @@ import pr.po.ratelimiterservice.ml.MlClient;
 public class RateLimitDecisionService {
 
     private static final double BLOCK_THRESHOLD = 0.85;
-    private static final double THROTTLE_THRESHOLD = 0.60;
-
     private final MlClient mlClient;
 
     public RateLimitDecisionService(MlClient mlClient) {
@@ -17,30 +15,19 @@ public class RateLimitDecisionService {
     }
 
     public Decision decide(FeatureVector features) {
+        // 1. Hard Rule (Safety Net)
+        if (features.getRequestsPerMinute() > 600) return Decision.BLOCK;
 
-        // 1️⃣ Hard safety rules (fast exit)
-        if (features.getRequestsPerMinute() > 600) {
-            return Decision.BLOCK;
-        }
-
-        if (features.getHttp4xxRate() > 0.8) {
-            return Decision.BLOCK;
-        }
-
-        // 2️⃣ ML scoring
+        // 2. AI Scoring (Call Python)
         double riskScore = mlClient.score(features);
+        
+        // Optional: Print score to console to SEE it working
+        System.out.println("🤖 AI Risk Score: " + riskScore + " for IP: " + features.getClientIp());
 
-        // 3️⃣ Decision thresholds
         if (riskScore >= BLOCK_THRESHOLD) {
             return Decision.BLOCK;
         }
 
-        if (riskScore >= THROTTLE_THRESHOLD) {
-            return Decision.THROTTLE;
-        }
-
-        // 4️⃣ Normal traffic
         return Decision.ALLOW;
     }
 }
-
