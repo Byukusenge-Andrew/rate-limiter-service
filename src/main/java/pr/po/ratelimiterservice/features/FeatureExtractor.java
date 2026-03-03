@@ -33,6 +33,12 @@ public class FeatureExtractor {
         // Set IP
         fv.setClientIp(getClientIp(exchange));
 
+        // Set HTTP Fields
+        fv.setPath(exchange.getRequest().getPath().value());
+        fv.setMethod(exchange.getRequest().getMethod().name());
+        String ua = exchange.getRequest().getHeaders().getFirst(HttpHeaders.USER_AGENT);
+        fv.setUserAgent(ua != null ? ua : "unknown");
+
         // Auth check
         fv.setAuthenticated(
                 exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)
@@ -49,14 +55,15 @@ public class FeatureExtractor {
     }
 
     private String getClientIp(ServerWebExchange exchange) {
-        String ip = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
-        if (ip == null) {
-            if (exchange.getRequest().getRemoteAddress() != null) {
-                ip = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
-            } else {
-                ip = "unknown";
-            }
+        String xForwardedFor = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // Take the first IP in the comma-separated list
+            return xForwardedFor.split(",")[0].trim();
         }
-        return ip;
+
+        if (exchange.getRequest().getRemoteAddress() != null) {
+            return exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+        }
+        return "unknown";
     }
 }

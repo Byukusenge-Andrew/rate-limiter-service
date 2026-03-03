@@ -28,6 +28,11 @@ public class FeatureVector {
     private Double payloadEntropy;
     private Double userReputationScore;
 
+    // HTTP specific metadata (for Python API)
+    private String path;
+    private String method;
+    private String userAgent;
+
     // Constructors
     public FeatureVector() {}
 
@@ -114,6 +119,15 @@ public class FeatureVector {
     public void setUserReputationScore(Double userReputationScore) {
         this.userReputationScore = userReputationScore;
     }
+
+    public String getPath() { return path; }
+    public void setPath(String path) { this.path = path; }
+
+    public String getMethod() { return method; }
+    public void setMethod(String method) { this.method = method; }
+
+    public String getUserAgent() { return userAgent; }
+    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
 
     // Builder-style helpers (optional fluency)
     public FeatureVector withClientIp(String clientIp) {

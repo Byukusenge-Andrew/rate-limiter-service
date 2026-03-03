@@ -35,9 +35,10 @@ public class RateLimitFilter implements WebFilter { // <--- Changed from GlobalF
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         // 1. Skip static assets or health checks if you want (Optional)
-        // if (exchange.getRequest().getPath().value().equals("/health")) {
-        //    return chain.filter(exchange);
-        // }
+        String path = exchange.getRequest().getPath().value();
+        if (path.startsWith("/actuator") || path.equals("/health")) {
+            return chain.filter(exchange);
+        }
 
         // 2. Extract Features (Async Redis Call)
         return extractor.extract(exchange)

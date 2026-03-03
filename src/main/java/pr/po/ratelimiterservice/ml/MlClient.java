@@ -7,14 +7,20 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Component
 public class MlClient {
 
     private final WebClient webClient;
 
-    public MlClient(WebClient.Builder webClientBuilder) {
-        // Pointing to the Python Microservice
-        this.webClient = webClientBuilder.baseUrl("http://ml-scoring-service:8000").build();
+    public MlClient(WebClient.Builder webClientBuilder,
+                    @Value("${ml.service.url:http://ml-scoring-service:8000}") String baseUrl,
+                    @Value("${ml.api.key:changeme_api_key}") String apiKey) {
+        
+        this.webClient = webClientBuilder.baseUrl(baseUrl)
+                .defaultHeader("X-API-Key", apiKey)
+                .build();
     }
 
     /**
